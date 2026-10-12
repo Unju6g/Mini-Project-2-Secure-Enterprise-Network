@@ -1,0 +1,13 @@
+! ===== BEFORE HARDENING (take "before" screenshots with this state) =====
+! Use on HO-R1 / HO-SW1 / HO-SW2 / BO devices BEFORE applying the final configs. Only addressing + routing + lazy defaults.
+hostname HO-R1
+enable password cisco                 ! plain-text, default-style password
+line vty 0 4
+ password cisco
+ login
+ transport input telnet               ! Telnet = cleartext (Task 2 capture)
+ip http server                        ! unneeded service
+! no ACLs, all PCs in VLAN 1 (no isolation), no port-security, no DHCP snooping, no 802.1X
+! no crypto map -> BO<->HO traffic crosses ISP in clear (Task 13 "before")
+! AP: open SSID "WTC-Guest" or WPA2 PSK "12345678" (Task 11 weak example)
+! Server: HTTP+SMTP/POP3 in plain text, default RADIUS secret "cisco"

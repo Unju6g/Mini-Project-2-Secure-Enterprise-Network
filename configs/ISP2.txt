@@ -1,0 +1,15 @@
+! ===== ISP2 - deliberately NO security =====
+enable
+configure terminal
+hostname ISP2
+interface GigabitEthernet0/0
+ description To ISP1
+ ip address 200.2.2.2 255.255.255.252
+ no shutdown
+interface GigabitEthernet0/1
+ description To BO-R1
+ ip address 200.3.3.2 255.255.255.252
+ no shutdown
+ip route 200.1.1.0 255.255.255.252 200.2.2.1
+end
+write memory

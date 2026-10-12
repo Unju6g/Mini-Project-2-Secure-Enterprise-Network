@@ -1,0 +1,60 @@
+! ===== BO-R1 (Cisco 2911) - Branch Office router =====
+! Packet Tracer: license boot module c2900 technology-package securityk9 ; write ; reload
+enable
+configure terminal
+hostname BO-R1
+no ip domain-lookup
+ip domain-name walchand.local
+enable secret WtcEna2026
+service password-encryption
+banner motd ^ AUTHORIZED ACCESS ONLY - Walchand Tech Campus BO. ^
+username admin privilege 15 secret WtcAdm2026
+!
+aaa new-model
+radius-server host 192.168.40.10 key Rad1us2026
+aaa authentication login default group radius local
+!
+interface GigabitEthernet0/0
+ description BO LAN
+ ip address 172.16.10.1 255.255.255.0
+ no shutdown
+interface GigabitEthernet0/1
+ description To ISP2 (untrusted)
+ ip address 200.3.3.1 255.255.255.252
+ no shutdown
+ip route 0.0.0.0 0.0.0.0 200.3.3.2
+!
+ip dhcp excluded-address 172.16.10.1 172.16.10.20
+ip dhcp pool BO-LAN
+ network 172.16.10.0 255.255.255.0
+ default-router 172.16.10.1
+ dns-server 192.168.40.10
+!
+crypto key generate rsa general-keys modulus 2048
+ip ssh version 2
+no ip http server
+line con 0
+ exec-timeout 5 0
+line vty 0 4
+ transport input ssh
+ exec-timeout 5 0
+!
+crypto isakmp policy 10
+ encryption aes 256
+ hash sha
+ authentication pre-share
+ group 2
+ lifetime 86400
+crypto isakmp key WalchandVPN2026 address 200.1.1.1
+crypto ipsec transform-set WTC-TS esp-aes 256 esp-sha-hmac
+ mode tunnel
+! mirror image of HO ACL
+access-list 110 permit ip 172.16.10.0 0.0.0.255 192.168.0.0 0.0.255.255
+crypto map WTC-MAP 10 ipsec-isakmp
+ set peer 200.1.1.1
+ set transform-set WTC-TS
+ match address 110
+interface GigabitEthernet0/1
+ crypto map WTC-MAP
+end
+write memory
